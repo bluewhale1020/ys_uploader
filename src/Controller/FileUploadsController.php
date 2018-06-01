@@ -182,12 +182,21 @@ class FileUploadsController extends AppController
     public function download($id = null)
     {
         if ($this->request->is(['patch', 'post', 'put'])) {
-            $input_pass = $_POST['pass'];
-             $fileUpload = $this->FileUploads->checkPassGet($id,$input_pass);
-            if(!$fileUpload){
-                $this->Flash->error(__('ファイルのパスワードが違います。'));
-                return $this->redirect(['action' => 'view',$id]);                
-            }
+             if($this->Auth->user('role') == 'admin'){//adminはパス無しで削除できる
+                 $fileUpload = $this->FileUploads->get($id);
+             }else{
+                $input_pass = $_POST['pass'];
+                
+                 $fileUpload = $this->FileUploads->checkPassGet($id,$input_pass);
+                                  
+                if(!$fileUpload){
+                    $this->Flash->error(__('ファイルのパスワードが違います。'));
+                    return $this->redirect(['action' => 'view',$id]);                
+                }
+
+             }   
+
+
             $dir = realpath(TMP . DS . "uploads");          
             try {
                 //view無しで 出力
@@ -221,7 +230,7 @@ class FileUploadsController extends AppController
             $this->Flash->error(__('ファイルのパスワードが違います。'));
             return $this->redirect(['action' => 'view',$id]);                
         }        
-        debug($fileUpload); die();
+        //debug($fileUpload); die();
         //$fileUpload = $this->FileUploads->get($id);
         
         $dir = realpath(TMP . DS . "uploads");
