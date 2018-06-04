@@ -87,7 +87,7 @@ class MimeTypesController extends AppController
             if ($this->MimeTypes->save($mimeType)) {
                 $this->Flash->success(__('新規MimeType登録を完了しました'));
 
-                return $this->redirect(['action' => 'index']);
+                return $this->redirect(['action' => 'view',$mimeType->id]);
             }
             $this->Flash->error(__('MimeType登録に失敗しました。再度やり直してください。'));
         }
@@ -111,7 +111,7 @@ class MimeTypesController extends AppController
             if ($this->MimeTypes->save($mimeType)) {
                 $this->Flash->success(__('MimeType情報を更新しました。'));
 
-                return $this->redirect(['action' => 'index']);
+                return $this->redirect(['action' => 'view',$mimeType->id]);
             }
             $this->Flash->error(__('MimeType情報の更新に失敗しました。再度やり直してください。'));
         }
