@@ -3,6 +3,8 @@ namespace App\Controller;
 
 use App\Controller\AppController;
 
+use Cake\ORM\TableRegistry;
+
 use Cake\Filesystem\Folder;
 use Cake\Filesystem\File;
 use RuntimeException;
@@ -53,17 +55,26 @@ class FileUploadsController extends AppController
                    //debug($conditions);die();
                 $noData = false;                                
             }            
+            //アップロード者
+            if(!empty($this->request->data['アップロード者'])){
+   
+                $conditions[] = ['user_id'=>$this->request->data['アップロード者']];
+                   //debug($conditions);die();
+                $noData = false;                                
+            } 
+
             
             if(!$noData){
                 //debug($conditions);
                     $this->paginate = [
-                        'conditions' => $conditions
+                        'conditions' => $conditions,
+                        //'contain' => ['Users']
                     ];
                 
             
             }
-
-        }        
+        }
+                      $this->paginate['contain'] = 'Users';         
         
         $fileUploads = $this->paginate($this->FileUploads);
 
@@ -71,6 +82,10 @@ class FileUploadsController extends AppController
         
         $mimetypes = $this->FileHandler->getAllowedMime();
         $this->set(compact('mimetypes'));
+        
+        $Users = TableRegistry::get('Users');
+        $users = $Users->find('list');
+        $this->set(compact('users'));        
     }
 
     /**
@@ -83,7 +98,7 @@ class FileUploadsController extends AppController
     public function view($id = null)
     {
         $fileUpload = $this->FileUploads->get($id, [
-            'contain' => []
+            'contain' => ["Users"]
         ]);
 
         $this->set('fileUpload', $fileUpload);
@@ -107,7 +122,7 @@ class FileUploadsController extends AppController
             $dir = realpath(TMP . DS . "uploads");
             $limitFileSize = 50 * 1000 * 1000;//50MB 1024 * 1024;
             try {
-                $file_name = $this->FileHandler->file_upload($this->request->data['file_name'], $dir, $limitFileSize);
+                $hash_name = $this->FileHandler->file_upload($this->request->data['file_name'], $dir, $limitFileSize);
             } catch (RuntimeException $e){
                 $this->Flash->error(__('ファイルのアップロードができませんでした.'));
                 $this->Flash->error(__($e->getMessage()));
@@ -115,7 +130,7 @@ class FileUploadsController extends AppController
             }
  
             //ファイルデータの整理
-            $this->request->data = $this->appendFileData($this->request->data,$file_name);
+            $this->request->data = $this->appendFileData($this->request->data,$hash_name);
             //debug($this->request->data);die();
             $fileUpload = $this->FileUploads->patchEntity($fileUpload, $this->request->getData());
              
@@ -128,6 +143,8 @@ class FileUploadsController extends AppController
             $this->Flash->error(__('ファイルデータの登録に失敗しました。 再度やり直してください。'));
         }
         $this->set(compact('fileUpload'));
+        
+
     }
 
     /**
@@ -136,10 +153,11 @@ class FileUploadsController extends AppController
      * @param requestdata 
      * @return modified requestdata
      */    
-    private function appendFileData($requestdata,$file_name){
-        //$file_name = $requestdata['file_name']['name'];
+    private function appendFileData($requestdata,$hash_name){
+        $file_name = $requestdata['file_name']['name'];
         $mime_type = $requestdata['file_name']['type'];
         $file_size = $requestdata['file_name']['size'];
+        $requestdata['hash_name'] = $hash_name; 
         $requestdata['file_name'] = $file_name;        
         $requestdata['mime_type'] = $mime_type;
         $requestdata['file_size'] = $file_size;
@@ -223,9 +241,14 @@ class FileUploadsController extends AppController
     public function delete($id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
-        
-        $input_pass = $_POST['pass'];
-         $fileUpload = $this->FileUploads->checkPassGet($id,$input_pass);
+ 
+         if($this->Auth->user('role') == 'admin'){//adminはパス無しで削除できる
+             $fileUpload = $this->FileUploads->get($id);
+         }else{
+             $input_pass = $_POST['pass'];
+             $fileUpload = $this->FileUploads->checkPassGet($id,$input_pass);                
+         }        
+
         if(!$fileUpload){
             $this->Flash->error(__('ファイルのパスワードが違います。'));
             return $this->redirect(['action' => 'view',$id]);                
@@ -235,8 +258,8 @@ class FileUploadsController extends AppController
         
         $dir = realpath(TMP . DS . "uploads");
         try {
-            $filename = $this->FileHandler->conv_sjis_auto($fileUpload->file_name);
-            $del_file = new File($dir . DS . $filename);
+            //$filename = $this->FileHandler->conv_sjis_auto($fileUpload->file_name);
+            $del_file = new File($dir . DS . $fileUpload->hash_name);
             // ファイル削除処理実行
             if ($del_file->exists()) {
                 // ファイルがある時の処理

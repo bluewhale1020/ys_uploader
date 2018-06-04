@@ -13,6 +13,7 @@ use Cake\ORM\Entity;
  * @property string $file_size
  * @property \Cake\I18n\FrozenTime $created
  * @property \Cake\I18n\FrozenTime $modified
+ * @property string $user_id 
  */
 class FileUpload extends Entity
 {
@@ -28,12 +29,14 @@ class FileUpload extends Entity
      */
     protected $_accessible = [
         'file_name' => true,
+        'hash_name'=>true,
         'password' => true,        
         'mime_type' => true,
         'file_size' => true,
         'created' => true,
         'modified' => true,
         'description' => true,
+        'user_id'=>true
     ];
     
     protected function _setPassword($password)

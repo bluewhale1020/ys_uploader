@@ -4,6 +4,8 @@ namespace App\Controller\Component;
 use Cake\Controller\Component;
 use Cake\Controller\ComponentRegistry;
 
+use Cake\ORM\TableRegistry;
+
 use Cake\Filesystem\Folder;
 use Cake\Filesystem\File;
 use RuntimeException;
@@ -30,50 +32,17 @@ class FileHandlerComponent extends Component
      *
      * This can be overwritten by setAllowedMime()
      */        
-    var $_allowedMime = [
-                              'image/jpeg' => 'jpg',                     // images
-                              'image/pjpeg' => 'pjpeg', 
-                              'image/png' => 'png', 
-                              'image/gif' => 'gif', 
-                              'image/tiff' => 'tiff', 
-                              'image/x-tiff' => 'tiff', 
-
-                              'application/pdf' => 'pdf',                // pdf
-                              'application/x-pdf' => 'pdf', 
-                              'application/acrobat' => 'acrobat', 
-                              'text/pdf' => 'pdf',
-                              'text/x-pdf' => 'pdf', 
-
-                              'text/plain' => 'txt',                     // text
-                              
-                              'application/msword' => 'doc',             // word
-                              'application/vnd.openxmlformats-officedocument.wordprocessingml.document'=> 'docx',
-                              'application/mspowerpoint' => 'ppt',       // powerpoint
-                              'application/powerpoint' => 'ppt',
-                              'application/vnd.ms-powerpoint' => 'ppt',
-                              'application/x-mspowerpoint' => 'ppt',
-                              'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'pptx',
-                              'application/x-msexcel' => 'xls',          // excel
-                              'application/excel' => 'xls',
-                              'application/x-excel' => 'xls',
-                              'application/vnd.ms-excel' => 'xls',                              
-                              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'=>'xlsx',
-                              'application/vnd.ms-access' => 'mdb',
-                              'application/x-msaccess'=>'mdb',
-
-                              'application/x-compressed' => 'zip',       // compressed files
-                              'application/x-zip-compressed' => 'zip',
-                              'application/zip' => 'zip',
-                              'multipart/x-zip' => 'zip',
-                              'application/x-tar' => 'tar',
-                              'application/x-compressed' => 'zip',
-                              'application/x-gzip' => 'gzip',
-                              'application/x-gzip' => 'gzip',
-                              'multipart/x-gzip' => 'gzip'
-                       ];
-     var $_allowedAmbiguousMime = [
-        'application/vnd.ms-office'
-    ];
+    var $_allowedMime = [];
+    var $_allowedAmbiguousMime = [];
+    
+    public function initialize(array $config) {
+        /*初期処理*/
+        $this->MimeTypes = TableRegistry::get("MimeTypes");
+        
+        $this->_allowedAmbiguousMime = $this->MimeTypes->createAllowedAmbiguousMimeArray();
+        $this->_allowedMime = $this->MimeTypes->createAllowedMimeArray();
+        
+    }    
                        
     
     public function getAllowedMime(){
@@ -153,30 +122,18 @@ class FileHandlerComponent extends Component
             }else{
                 throw new RuntimeException('このファイルの形式には対応していません。');
             }
-            // if (false === $ext = array_keys($this->_allowedMime,$file['type'],true)
-                                                // // ($file['type'],
-                                                // // $this->_allowedMime
-                                              // // ['jpg' => 'image/jpeg',
-                                               // // 'png' => 'image/png',
-                                               // // 'gif' => 'image/gif',]
-                                               // // ,
-                                              // // true)
-                                              // ){
-                // throw new RuntimeException('このファイルの形式には対応していません。');
-            // }
  
             // ファイル名の生成
             //Windows folder 日本語文字化け対策 ファイル名をSJISに
-            
-            $uploadFile = $this->conv_sjis_auto($file["name"]);
-            //$uploadFile = sha1_file($file["tmp_name"]) . "." . $ext;
+            //$uploadFile = $this->conv_sjis_auto($file["name"]);
+            $hashName = sha1_file($file["tmp_name"]) . "." . $ext;
  
-             if (strpos($uploadFile, '\\') !== false ) {
-                throw new RuntimeException('そのファイル名では保存できません。ファイル名は出来るだけアルファベットをご利用ください。');
-            }  
+             // if (strpos($uploadFile, '\\') !== false ) {
+                // throw new RuntimeException('そのファイル名では保存できません。ファイル名は出来るだけアルファベットをご利用ください。');
+            // }  
  
             // ファイルの移動
-            if (!@move_uploaded_file($file["tmp_name"], $dir . DS . $uploadFile)){
+            if (!@move_uploaded_file($file["tmp_name"], $dir . DS . $hashName)){
                 throw new RuntimeException('ファイルの移動に失敗しました。');
             }
  
@@ -186,7 +143,7 @@ class FileHandlerComponent extends Component
         } catch (RuntimeException $e) {
             throw $e;
         }
-        return $file["name"]; //ファイル名 UTF-8
+        return $hashName; //ファイル名 UTF-8
     }    
     
     public function conv_sjis_auto($filename){
@@ -205,11 +162,12 @@ class FileHandlerComponent extends Component
         $dir = realpath(TMP .DS . "uploads");      
     }
     
+    $hash_name = $file['hash_name'];
     $filename = $file['file_name'];
     
    // ダウンロードファイルフルパス
     //Windows folder 日本語文字化け対策 ファイル名をSJISに
-       $file_path = $dir . DS . $this->conv_sjis_auto($filename); 
+       $file_path = $dir . DS . $hash_name; 
 
     //拡張子取得
     if(!empty($this->_allowedMime[$file['mime_type']])){
@@ -217,16 +175,7 @@ class FileHandlerComponent extends Component
     }else{
         throw new RuntimeException('このファイルの形式には対応していません。');
     }    
-            // ファイルタイプのチェックし、拡張子を取得
-            // if (false === $ext = array_search($file['mime_type'],
-                                                // $this->_allowedMime
-                                              // // ['jpg' => 'image/jpeg',
-                                               // // 'png' => 'image/png',
-                                               // // 'gif' => 'image/gif',]
-                                               // ,
-                                              // true)){
-                // throw new RuntimeException('このファイルの形式はダウンロードできません。');
-            // }    
+  
 
 
         // ファイルがcake/app/webroot/files以下にあるとき

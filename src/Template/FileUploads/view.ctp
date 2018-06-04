@@ -162,6 +162,11 @@ $(document).ready(function(){
             <td><?= h($fileUpload->description) ?></td>
         </tr>        
         <tr>
+        <tr>
+            <th scope="row"><?= __('アップロード者') ?></th>
+            <td><?= h($fileUpload->user->username) ?></td>
+        </tr>        
+        <tr>            
             <th scope="row"><?= __('Id') ?></th>
             <td id="file_id"><?= $this->Number->format($fileUpload->id) ?></td>
         </tr>

@@ -39,7 +39,7 @@ class FileUploadsTable extends AppTable
         $this->setDisplayField('id');
         $this->setPrimaryKey('id');
 
-        //$this->addBehavior('Timestamp');
+        $this->belongsTo('Users');
     }
 
     /**
@@ -60,8 +60,13 @@ class FileUploadsTable extends AppTable
             ->requirePresence('file_name', 'create')
             ->notEmpty('file_name');
         $validator
+            ->scalar('hash_name')
+            ->maxLength('hash_name', 50)
+            ->requirePresence('hash_name', 'create')
+            ->notEmpty('hash_name');            
+        $validator
             ->maxLength('password', 255)
-            ->allowEmpty('id', 'create');
+            ->allowEmpty('password', 'create');
 
         $validator
             ->scalar('mime_type')

@@ -38,6 +38,7 @@
             echo $this->Form->control('file_name',["type"=>"file","label"=>"ファイルを選択"]); 
             echo $this->Form->control('description',["label"=>"内容"]); 
             echo $this->Form->input('password', ['label'=>'パスワード','class' => 'form-control']);
+            echo $this->Form->input('user_id', ['type' => 'hidden','value'=>$authUser['id']]);
                        
         ?>
                     </div>

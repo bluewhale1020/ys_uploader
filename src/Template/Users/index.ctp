@@ -17,7 +17,7 @@ echo $this->Html->link(' 新規ユーザー',[
     'action' => 'add'
 ],
 [
-    'class' => 'btn btn-primary glyphicon glyphicon-plus']
+    'class' => 'btn btn-sm btn-primary glyphicon glyphicon-plus']
 
 );
 ?>
@@ -85,12 +85,12 @@ echo $this->Html->link(' 新規ユーザー',[
                 <td><?= h($user->modified) ?></td>
                 <td class="actions">
                     <?= $this->Html->link(__('　閲覧'), ['action' => 'view', $user->id],
-                    ['class' => 'btn btn-warning glyphicon glyphicon-info-sign']) ?>
+                    ['class' => 'btn btn-sm btn-warning glyphicon glyphicon-info-sign']) ?>
                     <?= $this->Html->link(__('　編集'), ['action' => 'edit', $user->id],
-                    ['class' => 'btn btn-success glyphicon glyphicon-pencil']) ?>                    
+                    ['class' => 'btn btn-sm btn-success glyphicon glyphicon-pencil']) ?>                    
                     <?= $this->Form->postLink(__('　削除'), ['action' => 'delete', $user->id],
                      ['confirm' => __('本当に{0}を削除して宜しいでしょうか?', $user->username),
-                    'class' => 'btn btn-danger glyphicon glyphicon-remove']) ?>                    
+                    'class' => 'btn btn-sm btn-danger glyphicon glyphicon-remove']) ?>                    
                 </td>
             </tr>
             <?php endforeach; ?>       

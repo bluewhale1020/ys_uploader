@@ -91,7 +91,7 @@ echo $this->Html->link(' 新規アップロード',[
     'action' => 'add'
 ],
 [
-    'class' => 'btn btn-primary glyphicon glyphicon-plus']
+    'class' => 'btn btn-sm btn-primary glyphicon glyphicon-plus']
 
 );
 ?>
@@ -106,7 +106,7 @@ echo $this->Html->link(' 新規アップロード',[
   </div><!-- /.box-header -->
   <div class="box-body">
   
-  <div class="col-md-9 pull-right">   
+  <div class="col-md-11 pull-right">   
  <div class="box box-solid text-right bg-gray">
   <div class="box-body">
  <div >
@@ -126,6 +126,11 @@ echo $this->Html->link(' 新規アップロード',[
   <?php
   echo $this->Form->input('ファイル種類',[
     'options'=> $mimetypes, 'empty' => '--'
+  ]);
+  ?>&nbsp;&nbsp;&nbsp;&nbsp;
+    <?php
+  echo $this->Form->input('アップロード者',[
+    'options'=> $users, 'empty' => '--'
   ]);
   ?>&nbsp;&nbsp;&nbsp;&nbsp;
   <?php
@@ -151,6 +156,7 @@ echo $this->Html->link(' 新規アップロード',[
                 <th scope="col"><?= $this->Paginator->sort('mime_type',"ファイル種類") ?></th>
                 <th scope="col"><?= $this->Paginator->sort('file_size',"サイズ") ?></th>
                 <th scope="col"><?= $this->Paginator->sort('description',"内容") ?></th>                
+                <th scope="col"><?= $this->Paginator->sort('username',"アップロード者") ?></th>
                 <th scope="col"><?= $this->Paginator->sort('created',"作成日") ?></th>
                 <th scope="col"><?= $this->Paginator->sort('modified',"最終更新日") ?></th>
                 <th scope="col" class="actions"><?= __('操作') ?></th>
@@ -172,15 +178,16 @@ echo $this->Html->link(' 新規アップロード',[
                 <td><?= h($fileUpload->file_name) ?></td>
                 <td><?= h($fileUpload->mime_type) ?></td>
                 <td><?= h($fileUpload->file_size) ?></td>
-                <td><?= h($fileUpload->description) ?></td>                
+                <td><?= h($fileUpload->description) ?></td>
+                <td><?= h($fileUpload->user->username) ?></td>                                  
                 <td><?= h($fileUpload->created) ?></td>
                 <td><?= h($fileUpload->modified) ?></td>
                 <td class="actions">
                     <?= $this->Html->link(__('　閲覧'), ['action' => 'view', $fileUpload->id],
-                    ['class' => 'btn btn-warning glyphicon glyphicon-info-sign']) ?>
+                    ['class' => 'btn btn-sm btn-warning glyphicon glyphicon-info-sign']) ?>
 
 <?=$this->Html->link(' ファイルの削除', array('action' => 'delete'),
-                array('lock_status'=>$locked,'class' => 'delete_link btn btn-danger glyphicon glyphicon-remove','onclick'=>'file_id = '.$fileUpload->id.';return false;'))  ?>                
+                array('lock_status'=>$locked,'class' => 'delete_link btn btn-sm btn-danger glyphicon glyphicon-remove','onclick'=>'file_id = '.$fileUpload->id.';return false;'))  ?>                
                    
                 </td>
             </tr>

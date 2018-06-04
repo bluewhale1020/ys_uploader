@@ -11,14 +11,14 @@
         "cakephp/plugin-installer": "^1.0",
         "josegonzalez/dotenv": "3.*",
         "maiconpinto/cakephp-adminlte-theme": "^1.0",
-        "mobiledetect/mobiledetectlib": "2.*",
-        "phpunit/phpunit": "^5.7"
+        "mobiledetect/mobiledetectlib": "2.*"
     },
     "require-dev": {
         "cakephp/bake": "^1.1",
         "cakephp/cakephp-codesniffer": "^3.0",
         "cakephp/debug_kit": "^3.15.0",
-        "psy/psysh": "@stable"
+        "psy/psysh": "@stable",
+        "phpunit/phpunit": "^5.7"        
     },
     "suggest": {
         "markstory/asset_compress": "An asset compression plugin which provides file concatenation and a flexible filter system for preprocessing and minification.",
