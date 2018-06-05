@@ -40,6 +40,7 @@ class FileUploadsTable extends AppTable
         $this->setPrimaryKey('id');
 
         $this->belongsTo('Users');
+        $this->belongsTo('Categories');
     }
 
     /**
@@ -84,7 +85,9 @@ class FileUploadsTable extends AppTable
             ->maxLength('description', 255)
             ->requirePresence('description', 'create')
             ->notEmpty('description');
-
+        $validator
+            ->integer('category_id')
+            ->allowEmpty('category_id', 'create');
 
         return $validator;
     }

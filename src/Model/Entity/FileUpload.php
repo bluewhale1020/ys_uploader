@@ -36,7 +36,8 @@ class FileUpload extends Entity
         'created' => true,
         'modified' => true,
         'description' => true,
-        'user_id'=>true
+        'user_id'=>true,
+        'category_id' => true
     ];
     
     protected function _setPassword($password)

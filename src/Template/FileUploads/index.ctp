@@ -85,9 +85,16 @@ $(document).ready(function(){
 
 <div class="box box-info">
   <div class="box-header with-border">
-    <h3 class="box-title">ファイル一覧表&nbsp;&nbsp;&nbsp;&nbsp;
+    <h3 class="box-title"><i class="fa fa-folder"></i>&nbsp;&nbsp;<?php
+    foreach ($categoryData as $key => $oneCategory) {
+        if($oneCategory->id == $category_id){
+            echo $oneCategory->name;
+            break;
+        }
+    }
+    ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <?php
-echo $this->Html->link(' 新規アップロード',[
+echo $this->Html->link(' 新規',[
     'action' => 'add'
 ],
 [
@@ -112,7 +119,7 @@ echo $this->Html->link(' 新規アップロード',[
  <div >
    <?php
     echo $this->Form->create(null,[
-    'url'=>['action' => 'index']
+    'url'=>['action' => 'index',$category_id]
     ,'class' => 'form-inline'
   ]); ?>
   
@@ -163,6 +170,21 @@ echo $this->Html->link(' 新規アップロード',[
             </tr>         
       </thead>
       <tbody>
+          <?php
+          //サイズのフォーマット用
+            function formatBytes($bytes, $precision = 2) {
+                $units = array('B', 'KB', 'MB', 'GB', 'TB');
+                $i = 0;
+            
+                while($bytes > 1024) {
+                    $bytes /= 1024;
+                    $i++;
+                }
+                return round($bytes, $precision) . ' ' . $units[$i];
+            }          
+         
+          ?>
+          
             <?php foreach ($fileUploads as $fileUpload): ?>
             <tr>
                 <td><?= $this->Number->format($fileUpload->id) ?></td>
@@ -177,7 +199,7 @@ echo $this->Html->link(' 新規アップロード',[
                   ?></td>
                 <td><?= h($fileUpload->file_name) ?></td>
                 <td><?= h($fileUpload->mime_type) ?></td>
-                <td><?= h($fileUpload->file_size) ?></td>
+                <td><?= h(formatBytes($fileUpload->file_size, 2)) ?></td>
                 <td><?= h($fileUpload->description) ?></td>
                 <td><?= h($fileUpload->user->username) ?></td>                                  
                 <td><?= h($fileUpload->created) ?></td>
@@ -186,7 +208,7 @@ echo $this->Html->link(' 新規アップロード',[
                     <?= $this->Html->link(__('　閲覧'), ['action' => 'view', $fileUpload->id],
                     ['class' => 'btn btn-sm btn-warning glyphicon glyphicon-info-sign']) ?>
 
-<?=$this->Html->link(' ファイルの削除', array('action' => 'delete'),
+<?=$this->Html->link(' 削除', array('action' => 'delete'),
                 array('lock_status'=>$locked,'class' => 'delete_link btn btn-sm btn-danger glyphicon glyphicon-remove','onclick'=>'file_id = '.$fileUpload->id.';return false;'))  ?>                
                    
                 </td>

@@ -39,7 +39,7 @@
             echo $this->Form->control('description',["label"=>"内容"]); 
             echo $this->Form->input('password', ['label'=>'パスワード','class' => 'form-control']);
             echo $this->Form->input('user_id', ['type' => 'hidden','value'=>$authUser['id']]);
-                       
+             echo $this->Form->control('category_id',["label"=>"カテゴリ","options"=>$categoryList]);                       
         ?>
                     </div>
                 </div>

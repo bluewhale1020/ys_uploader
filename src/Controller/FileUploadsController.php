@@ -21,7 +21,7 @@ class FileUploadsController extends AppController
 
     public $paginate = [
         'limit' => 25,
-        'contain'=>['Users'],
+        'contain'=>['Users',"Categories"],
         'order' => [
             'FileUploads.created' => 'desc'
         ]
@@ -33,6 +33,7 @@ class FileUploadsController extends AppController
 
         $this->loadComponent('FileHandler');
         $this->loadComponent('RequestHandler');
+        $this->loadComponent('Image');
     }
 
 
@@ -41,18 +42,31 @@ class FileUploadsController extends AppController
      *
      * @return \Cake\Http\Response|void
      */
-    public function index()
+    public function index($category_id = null)
     {
-        
+
+        //default値ID取得
+        $category_default_id = $this->Categories->getDefaultCategoryId();
+        if(empty($category_id)){
+            $category_id = $category_default_id;
+        }
+        if($category_id == $category_default_id){
+            $conditions = ['or'=>['category_id'=>$category_id,'category_id IS NULL'] ];
+        }else{
+            $conditions = ['category_id'=>$category_id];
+        }
+    
         if($this->request->is('post')){
+            
+     
             //データを検索する
-            $conditions = [];
-            $noData = true;
+            //$conditions = [];
+            //$noData = true;
             
             //ファイル名
             if(!empty($this->request->data['ファイル名'])){
                 $conditions[] = ['file_name like' => "%" . $this->request->data['ファイル名'] ."%"]; 
-                $noData = false;               
+               // $noData = false;               
             }
             
             //ファイル種類
@@ -60,7 +74,7 @@ class FileUploadsController extends AppController
                 $mimeTypes = $this->FileHandler->getFullMimeTypesFromExt($this->request->data['ファイル種類']);
                 
                 $conditions[] = ['mime_type IN ('. $mimeTypes .')'];
-                $noData = false;                                
+               // $noData = false;                                
             }            
             //アップロード者
             if(!empty($this->request->data['アップロード者'])){
@@ -70,16 +84,16 @@ class FileUploadsController extends AppController
             } 
 
             
-            if(!$noData){
+            //if(!$noData){
                 //debug($conditions);
-                    $this->paginate = [
-                        'conditions' => $conditions
-                    ];
-                
+          
             
-            }
+            //}
+        
+            
+            
         }
-       
+        $this->paginate['conditions'] =$conditions;       
         
         $fileUploads = $this->paginate($this->FileUploads);
 
@@ -90,7 +104,9 @@ class FileUploadsController extends AppController
         
         $Users = TableRegistry::get('Users');
         $users = $Users->find('list');
-        $this->set(compact('users'));        
+        $this->set(compact('users'));  
+        
+        $this->set(compact('category_id'));      
     }
 
     /**
@@ -103,9 +119,13 @@ class FileUploadsController extends AppController
     public function view($id = null)
     {
         $fileUpload = $this->FileUploads->get($id, [
-            'contain' => ["Users"]
+            'contain' => ["Users","Categories"]
         ]);
-
+        $imagedata = $this->Image->getImageData($fileUpload);
+        if($imagedata){
+            $this->set('imagedata', $imagedata);
+        }
+        
         $this->set('fileUpload', $fileUpload);
     }
 
@@ -149,7 +169,8 @@ class FileUploadsController extends AppController
         }
         $this->set(compact('fileUpload'));
         
-
+        $categoryList = $this->Categories->find('list');
+        $this->set(compact('categoryList'));         
     }
 
     /**
@@ -291,6 +312,6 @@ class FileUploadsController extends AppController
             $this->Flash->error(__('指定したファイルを削除できませんでした。 再度やり直してください。'));
         }
 
-        return $this->redirect(['action' => 'index']);
+        return $this->redirect(['action' => 'index',$fileUpload->category_id]);
     }
 }

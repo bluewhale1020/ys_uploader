@@ -17,6 +17,7 @@ namespace App\Controller;
 use Cake\Controller\Controller;
 use Cake\Event\Event;
 
+use Cake\ORM\TableRegistry;
 /**
  * Application Controller
  *
@@ -114,6 +115,11 @@ class AppController extends Controller
             //$this->Auth->flash['params']['class'] = 'alert alert-danger'; 
             //$this->Auth->allow(['index', 'view', 'display']);
                 $this->set('authUser', $this->Auth->user());
+                
+                //メインメニューにカテゴリ一覧を並べる
+                $this->Categories = TableRegistry::get("Categories");
+                $this->set('categoryData', $this->Categories->getCategoryMenuData());
+                
                     
         }
 

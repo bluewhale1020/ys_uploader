@@ -109,7 +109,7 @@ $(document).ready(function(){
                 array('class' => 'download_link glyphicon glyphicon-download','onclick'=>'return false;'))  ?>            
         <li class="separator"></li>
 
-       <li><?=$this->Html->link(' アップロードファイル一覧', array('action' => 'index'),
+       <li><?=$this->Html->link(' アップロードファイル一覧', array('action' => 'index',$fileUpload->category_id),
                 array('class' => 'glyphicon glyphicon-list'
                         ))  ?></li>  
          <li>
@@ -144,7 +144,11 @@ $(document).ready(function(){
             <tr class="bg-orange-active">
             <th>項目名</th>
             <th>データ</th>
-            </tr>        
+            </tr>   
+        <tr>
+            <th scope="row"><?= __('カテゴリ') ?></th>
+            <td><?= h($fileUpload->category->name) ?></td>
+        </tr>                    
         <tr>
             <th scope="row"><?= __('ファイル名') ?></th>
             <td><?= h($fileUpload->file_name) ?></td>
@@ -182,6 +186,19 @@ $(document).ready(function(){
                 
               </div>
               <!-- /.responsive -->
+<?php if(!empty($imagedata)): ?>            
+<div class="row">
+
+
+  
+    <div class="col-xs-12 col-md-12">
+        <?php
+//write out the image to client browser width='".(200*$iw/$ih)."'
+echo "<img class='img-responsive img-thumbnail center-block' src='data:".$fileUpload->mime_type.";base64,".base64_encode($imagedata)."' alt='thumb'>";        
+        ?>
+    </div>
+</div>              
+ <?php endif; ?>             
             </div>
             <!-- /.box-body -->
             <div class="box-footer">
