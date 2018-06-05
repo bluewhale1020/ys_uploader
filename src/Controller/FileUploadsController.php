@@ -19,6 +19,14 @@ use RuntimeException;
 class FileUploadsController extends AppController
 {
 
+    public $paginate = [
+        'limit' => 25,
+        'contain'=>['Users'],
+        'order' => [
+            'FileUploads.created' => 'desc'
+        ]
+    ];
+
     public function initialize()
     {
         parent::initialize();
@@ -52,14 +60,12 @@ class FileUploadsController extends AppController
                 $mimeTypes = $this->FileHandler->getFullMimeTypesFromExt($this->request->data['ファイル種類']);
                 
                 $conditions[] = ['mime_type IN ('. $mimeTypes .')'];
-                   //debug($conditions);die();
                 $noData = false;                                
             }            
             //アップロード者
             if(!empty($this->request->data['アップロード者'])){
    
                 $conditions[] = ['user_id'=>$this->request->data['アップロード者']];
-                   //debug($conditions);die();
                 $noData = false;                                
             } 
 
@@ -67,14 +73,13 @@ class FileUploadsController extends AppController
             if(!$noData){
                 //debug($conditions);
                     $this->paginate = [
-                        'conditions' => $conditions,
-                        //'contain' => ['Users']
+                        'conditions' => $conditions
                     ];
                 
             
             }
         }
-                      $this->paginate['contain'] = 'Users';         
+       
         
         $fileUploads = $this->paginate($this->FileUploads);
 
