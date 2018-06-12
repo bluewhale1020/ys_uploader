@@ -10,6 +10,9 @@ use RuntimeException;
 
 /**
  * ImageComponent component
+ * 
+ * osolete replaced by Preview Component
+ * 
  */
 class ImageComponent extends Component
 {

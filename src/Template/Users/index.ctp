@@ -13,7 +13,7 @@
   <div class="box-header with-border">
     <h3 class="box-title">ユーザー一覧表&nbsp;&nbsp;&nbsp;&nbsp;
 <?php
-echo $this->Html->link(' 新規ユーザー',[
+echo $this->Html->link(' 新規',[
     'action' => 'add'
 ],
 [

@@ -81,6 +81,12 @@ class CategoriesTable extends Table
         return $query->id;
     }
     
+    /*
+     * getCategoryMenuData method
+     * 再度メニュー用のカテゴリデータを取得
+     * 
+     */
+    
     public function getCategoryMenuData(){
         $this->_defaultCategoryId = $this->getDefaultCategoryId();
       
@@ -101,5 +107,49 @@ class CategoriesTable extends Table
         return $result;
         
     }
+ 
+     /*
+     * beforeDelete method
+     * カテゴリにアップロードファイルがある場合は、削除不可
+     * 
+     */
+    public function beforeDelete($event, $entity, $options)
+    {
+        $this->FileUploads = TableRegistry::get("FileUploads");
+        $count = $this->FileUploads->find()->where(['category_id'=>$entity->id])->count();
+        
+        if($count > 0){
+            $this->error = __('指定のカテゴリにアップロードファイルがあるため、削除できません。');
+             return false;
+            
+        }
+    }
+ 
+     /*
+     * afterSave method
+     * 保存するレコードが規定値の場合、他のレコードを非規定値に設定
+     * 
+     */
+    public function afterSave($event, $entity, $options) {
+
+         $query = $this->find()
+        ->where(['is_default'=> 1,'not'=>['id'=>$entity->id] ])->first(); 
+        if($entity->is_default == 1) {
+
+            if($query){//他のレコードを非規定値に設定
+                $query->set('is_default', null);
+                $this->save($query);
+            }          
+            
+        }else{
+            if(!$query){//最初のレコードを規定値に設定
+                 $query = $this->find()
+                ->where(['not'=>['id'=>$entity->id] ])->first();             
+                $query->set('is_default', 1);
+                $this->save($query);
+            }             
+        }
+    }
     
+   
 }

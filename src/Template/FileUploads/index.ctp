@@ -89,13 +89,14 @@ $(document).ready(function(){
     foreach ($categoryData as $key => $oneCategory) {
         if($oneCategory->id == $category_id){
             echo $oneCategory->name;
+            
             break;
         }
     }
     ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <?php
 echo $this->Html->link(' 新規',[
-    'action' => 'add'
+    'action' => 'add',$category_id
 ],
 [
     'class' => 'btn btn-sm btn-primary glyphicon glyphicon-plus']

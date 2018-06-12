@@ -22,7 +22,7 @@ MimeType一覧
   <div class="box-header with-border">
     <h3 class="box-title">MimeType一覧表&nbsp;&nbsp;&nbsp;&nbsp;
 <?php
-echo $this->Html->link(' 新規MimeType登録',[
+echo $this->Html->link(' 新規',[
     'action' => 'add'
 ],
 [
@@ -140,4 +140,4 @@ echo $this->Html->link(' 新規MimeType登録',[
             
         </div>       
         
-    </div>
+    </div></section>

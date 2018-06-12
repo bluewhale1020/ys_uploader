@@ -34,6 +34,8 @@ class FileHandlerComponent extends Component
      */        
     var $_allowedMime = [];
     var $_allowedAmbiguousMime = [];
+    protected $_mime_type = "";
+    protected $_limit_file_size = 50000000;
     
     public function initialize(array $config) {
         /*初期処理*/
@@ -67,8 +69,15 @@ class FileHandlerComponent extends Component
         
         
     }
+    
+    public function getMimeType(){
+        return $this->_mime_type;
+    }
 
-    public function file_upload ($file = null,$dir = null, $limitFileSize = 1048576){
+    public function file_upload ($file = null,$dir = null, $limitFileSize = 0){
+        
+        if($limitFileSize==0){$limitFileSize = $this->_limit_file_size;}
+        
         try {
             // ファイルを保存するフォルダ $dirの値のチェック
             if ($dir){
@@ -93,8 +102,14 @@ class FileHandlerComponent extends Component
                 case UPLOAD_ERR_NO_FILE:
                     throw new RuntimeException('ファイルが送信されていません。');
                 case UPLOAD_ERR_INI_SIZE:
+                    //値: 1; アップロードされたファイルは、php.ini の upload_max_filesize ディレクティブの値を超えています（post_max_size, upload_max_filesize）
+                    $messages[] = 'アップロードされたファイルが大きすぎます。' . ini_get('upload_max_filesize') . '以下のファイルをアップロードしてください。';
+                    break;
+            
                 case UPLOAD_ERR_FORM_SIZE:
-                    throw new RuntimeException('許容ファイルサイズ（'.$limitFileSize.'）を超えています。');
+                    //値: 2; アップロードされたファイルは、HTML フォームで指定された MAX_FILE_SIZE を超えています。
+                    $messages[] = 'アップロードされたファイルが大きすぎます。' . ($_POST['MAX_FILE_SIZE'] / 1000) . 'KB以下のファイルをアップロードしてください。';
+                    break;
                 default:
                     throw new RuntimeException('不明なエラーです。');
             }
@@ -107,20 +122,20 @@ class FileHandlerComponent extends Component
  
             // ファイルサイズのチェック
             if ($fileInfo->size() > $limitFileSize) {
-                throw new RuntimeException('許容ファイルサイズ（'.$limitFileSize.'）を超えています。');
+                throw new RuntimeException('ファイルサイズ（'.$fileInfo->size() .'）が、許容ファイルサイズ（'.$limitFileSize.'）を超えています。');
             }
-
+            debug($file["type"]);debug($file);debug($file["tmp_name"]);debug(mime_content_type($file["tmp_name"]));die();
             //ファイルタイプを取得
-            $mime_type = mime_content_type($file["tmp_name"]);
-            if(in_array($mime_type, $this->_allowedAmbiguousMime) ){
-                $mime_type = $file["type"];
+            $this->_mime_type = mime_content_type($file["tmp_name"]);
+            if(in_array($this->_mime_type, $this->_allowedAmbiguousMime) or empty($this->_mime_type)){
+                $this->_mime_type = $file["type"];
             }
  
             // ファイルタイプのチェックし、拡張子を取得
-            if(!empty($this->_allowedMime[$mime_type])){
-                $ext = $this->_allowedMime[$mime_type];
+            if(!empty($this->_allowedMime[$this->_mime_type])){
+                $ext = $this->_allowedMime[$this->_mime_type];
             }else{
-                throw new RuntimeException('このファイルの形式には対応していません。');
+                throw new RuntimeException('このファイルの形式('.$this->_mime_type.')には対応していません。');
             }
  
             // ファイル名の生成

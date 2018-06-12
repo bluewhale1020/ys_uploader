@@ -81,6 +81,15 @@ $(document).ready(function(){
     }
     
 --></script>
+<style>
+    .img-frame{
+        height:auto;
+         max-height:650px;
+        overflow: scroll;
+    }
+    
+    
+</style>
     <!-- Content Header (Page header) -->
     <section class="content-header">
       <h1>
@@ -147,7 +156,11 @@ $(document).ready(function(){
             </tr>   
         <tr>
             <th scope="row"><?= __('カテゴリ') ?></th>
-            <td><?= h($fileUpload->category->name) ?></td>
+            <td><?php
+            if(!empty($fileUpload->category->name)){
+                echo h($fileUpload->category->name);
+            }
+              ?></td>
         </tr>                    
         <tr>
             <th scope="row"><?= __('ファイル名') ?></th>
@@ -186,16 +199,28 @@ $(document).ready(function(){
                 
               </div>
               <!-- /.responsive -->
-<?php if(!empty($imagedata)): ?>            
+<?php if(!empty($previewData)): ?>            
 <div class="row">
 
 
   
     <div class="col-xs-12 col-md-12">
+ <legend>Preview</legend>       
+  <div class="img-frame">     
         <?php
-//write out the image to client browser width='".(200*$iw/$ih)."'
-echo "<img class='img-responsive img-thumbnail center-block' src='data:".$fileUpload->mime_type.";base64,".base64_encode($imagedata)."' alt='thumb'>";        
+        if($fileType == "excel"){
+            echo $previewData;
+        }else if($fileType == "pdfimage"){
+            echo '<img  class="img-responsive img-thumbnail center-block" src="data:image/png;base64,'.base64_encode($previewData).'" alt="thumb" />';      
+            $previewData->clear();
+        }else{
+             //write out the image to client browser width='".(200*$iw/$ih)."'
+            echo "<img class='img-responsive img-thumbnail center-block' src='data:".$fileUpload->mime_type.";base64,".base64_encode($previewData)."' alt='thumb'>";        
+            
+        }
+        
         ?>
+        </div> 
     </div>
 </div>              
  <?php endif; ?>             

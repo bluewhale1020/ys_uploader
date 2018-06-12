@@ -33,7 +33,7 @@ class FileUploadsController extends AppController
 
         $this->loadComponent('FileHandler');
         $this->loadComponent('RequestHandler');
-        $this->loadComponent('Image');
+        $this->loadComponent('Preview');
     }
 
 
@@ -121,11 +121,18 @@ class FileUploadsController extends AppController
         $fileUpload = $this->FileUploads->get($id, [
             'contain' => ["Users","Categories"]
         ]);
-        $imagedata = $this->Image->getImageData($fileUpload);
-        if($imagedata){
-            $this->set('imagedata', $imagedata);
-        }
-        
+        // $imagedata = $this->Image->getImageData($fileUpload);
+        // if($imagedata){
+            // $this->set('imagedata', $imagedata);
+        // }
+        $previewData = $this->Preview->getPreviewData($fileUpload);
+        if($previewData){
+            $this->set('previewData', $previewData);
+            $this->set('fileType', $this->Preview->getFileType());
+            
+            //$this->Preview->clearInstances();
+            $this->Preview->deleteTempFile();
+        }        
         $this->set('fileUpload', $fileUpload);
     }
 
@@ -134,7 +141,7 @@ class FileUploadsController extends AppController
      *
      * @return \Cake\Http\Response|null Redirects on successful add, renders view otherwise.
      */
-    public function add()
+    public function add($category_id = null)
     {
         $fileUpload = $this->FileUploads->newEntity();
         if ($this->request->is(['patch', 'post', 'put'])) {
@@ -155,7 +162,7 @@ class FileUploadsController extends AppController
             }
  
             //ファイルデータの整理
-            $this->request->data = $this->appendFileData($this->request->data,$hash_name);
+            $this->request->data = $this->appendFileData($this->request->data,$hash_name,$this->FileHandler->getMimeType());
             //debug($this->request->data);die();
             $fileUpload = $this->FileUploads->patchEntity($fileUpload, $this->request->getData());
              
@@ -167,6 +174,11 @@ class FileUploadsController extends AppController
             }
             $this->Flash->error(__('ファイルデータの登録に失敗しました。 再度やり直してください。'));
         }
+        
+        if(!empty($category_id)){
+            $fileUpload->set('category_id', $category_id);
+        }
+        
         $this->set(compact('fileUpload'));
         
         $categoryList = $this->Categories->find('list');
@@ -179,9 +191,12 @@ class FileUploadsController extends AppController
      * @param requestdata 
      * @return modified requestdata
      */    
-    private function appendFileData($requestdata,$hash_name){
+    private function appendFileData($requestdata,$hash_name,$mime_type = null){
         $file_name = $requestdata['file_name']['name'];
-        $mime_type = $requestdata['file_name']['type'];
+        if(empty($mime_type)){
+            $mime_type = $requestdata['file_name']['type'];
+        }
+        
         $file_size = $requestdata['file_name']['size'];
         $requestdata['hash_name'] = $hash_name; 
         $requestdata['file_name'] = $file_name;        
@@ -206,11 +221,11 @@ class FileUploadsController extends AppController
         if ($this->request->is(['patch', 'post', 'put'])) {
             $fileUpload = $this->FileUploads->patchEntity($fileUpload, $this->request->getData());
             if ($this->FileUploads->save($fileUpload)) {
-                $this->Flash->success(__('The file upload has been saved.'));
+                $this->Flash->success(__('アップロードファイル情報を更新しました。'));
 
                 return $this->redirect(['action' => 'index']);
             }
-            $this->Flash->error(__('The file upload could not be saved. Please, try again.'));
+            $this->Flash->error(__('アップロードファイルの更新に失敗しました。再度やり直してください。'));
         }
         $this->set(compact('fileUpload'));
     }
