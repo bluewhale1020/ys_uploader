@@ -92,7 +92,7 @@ class FileHandlerComponent extends Component
             if (!isset($file['error']) || is_array($file['error'])){
                 throw new RuntimeException('無効なパラメーターです。');
             }
- 
+
             // エラーのチェック
             switch ($file['error']) {
                 case 0:
@@ -103,12 +103,12 @@ class FileHandlerComponent extends Component
                     throw new RuntimeException('ファイルが送信されていません。');
                 case UPLOAD_ERR_INI_SIZE:
                     //値: 1; アップロードされたファイルは、php.ini の upload_max_filesize ディレクティブの値を超えています（post_max_size, upload_max_filesize）
-                    $messages[] = 'アップロードされたファイルが大きすぎます。' . ini_get('upload_max_filesize') . '以下のファイルをアップロードしてください。';
+                    throw new RuntimeException('アップロードされたファイルが大きすぎます。' . ini_get('upload_max_filesize') . '以下のファイルをアップロードしてください。');
                     break;
             
                 case UPLOAD_ERR_FORM_SIZE:
                     //値: 2; アップロードされたファイルは、HTML フォームで指定された MAX_FILE_SIZE を超えています。
-                    $messages[] = 'アップロードされたファイルが大きすぎます。' . ($_POST['MAX_FILE_SIZE'] / 1000) . 'KB以下のファイルをアップロードしてください。';
+                    throw new RuntimeException('アップロードされたファイルが大きすぎます。' . ($_POST['MAX_FILE_SIZE'] / 1000) . 'KB以下のファイルをアップロードしてください。');
                     break;
                 default:
                     throw new RuntimeException('不明なエラーです。');
@@ -124,7 +124,7 @@ class FileHandlerComponent extends Component
             if ($fileInfo->size() > $limitFileSize) {
                 throw new RuntimeException('ファイルサイズ（'.$fileInfo->size() .'）が、許容ファイルサイズ（'.$limitFileSize.'）を超えています。');
             }
-            debug($file["type"]);debug($file);debug($file["tmp_name"]);debug(mime_content_type($file["tmp_name"]));die();
+
             //ファイルタイプを取得
             $this->_mime_type = mime_content_type($file["tmp_name"]);
             if(in_array($this->_mime_type, $this->_allowedAmbiguousMime) or empty($this->_mime_type)){
