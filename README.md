@@ -45,10 +45,10 @@ simplexml
 
 
 **WindowsOSの注意点**
-```
+
 WindowsOS上のサーバーにimagickをインストールするのは、かなり複雑な手続きが必要です。`phpinfo()`でphpの
 仕様を十分確認の上、下記のURLを参考にインストールして下さい。
-```
+
 
 
 **参考URL**
