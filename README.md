@@ -25,6 +25,41 @@ root/ys_uploader
 　├ webroot/  
 　└ その他のファイル
 ```
+## サーバーの設定 ##
+### cakePHP3に必要 ###
+
+**php**
+```
+5.6.0 以上
+```
+
+**extension**
+```
+mbstring 
+intl 
+simplexml 
+```
+
+### imagickのインストール ###
+サーバーに`imagick`をインストールして下さい。既にインストールされているかは、`phpinfo()`で確認できます。
+
+
+**WindowsOSの注意点**
+```
+WindowsOS上のサーバーにimagickをインストールするのは、かなり複雑な手続きが必要です。`phpinfo()`でphpの
+仕様を十分確認の上、下記のURLを参考にインストールして下さい。
+```
+
+
+**参考URL**
+```uri
+https://bonz-net.com/setting/windows%E7%89%88xampp%EF%BC%88php7-2-x%EF%BC%89%E3%81%ABimagemagick%E3%82%92%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB%E3%81%99%E3%82%8B%E6%96%B9%E6%B3%95/
+```
+phpの構成とダウンロードファイルの組み合わせは以下を参考
+```uri
+https://mlocati.github.io/articles/php-windows-imagick.html
+```
+
 
 ## データベース設定 ##
 フォルダ内の`uploaddb.sql`はシステムが利用するDBのテーブルを作成するSQLファイルです。データベースを作成後、
