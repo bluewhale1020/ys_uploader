@@ -31,7 +31,7 @@ password:guest
   <h3>ログイン方法</h3>
   <p>ブラウザで以下のURLにアクセスします。</p>
   <pre class="prettyprint">
-     https://holy-aobax.ssl-lolipop.jp/ys_uploader/users/login</pre>
+     サーバーURL/ys_uploader/users/login</pre>
   <b>ログイン後、<span class="text-red">アップロードファイル一覧画面</span>に移動します。</b>
   
   <h3>アップロード機能</h3>
