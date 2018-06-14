@@ -14,7 +14,6 @@
         "josegonzalez/dotenv": "3.*",
         "maiconpinto/cakephp-adminlte-theme": "^1.0",
         "mobiledetect/mobiledetectlib": "2.*",
-        "mpdf/mpdf": "^7.1",
         "phpoffice/phpexcel": "^1.8",
         "phpoffice/phpword": "^0.14.0"
     },

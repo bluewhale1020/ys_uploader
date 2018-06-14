@@ -1,7 +1,6 @@
 # CakePHP specific files #
 ##########################
 /config/app.php
-/vendor/*
 /config/.env
 /logs/*
 !/logs/empty
@@ -15,9 +14,8 @@
 !/tmp/sessions/empty
 /tmp/tests/*
 !/tmp/tests/empty
-/tmp/uploads/*
 #/tmp/*
-
+#/tmp/debug_kit.sqlite
 
 # OS generated files #
 ######################

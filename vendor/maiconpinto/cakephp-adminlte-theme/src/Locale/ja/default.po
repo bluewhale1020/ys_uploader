@@ -1,0 +1,109 @@
+## Template index.ctp
+
+msgid "New"
+msgstr "新規"
+
+msgid "List of"
+msgstr "リスト　"
+
+msgid "Fill in to start search"
+msgstr "キーを入力して検索"
+
+msgid "Filter"
+msgstr "フィルタ"
+
+msgid "Actions"
+msgstr "操作"
+
+msgid "Edit"
+msgstr "編集"
+
+msgid "Delete"
+msgstr "削除"
+
+msgid "Confirm to delete this entry?"
+msgstr "このレコードを削除してよろしいでしょうか？"
+
+
+## Template add.ctp
+
+msgid "Add"
+msgstr "新規作成"
+
+msgid "Back"
+msgstr "戻る"
+
+msgid "Form"
+msgstr "フォーム"
+
+msgid "Save"
+msgstr "保存"
+
+
+## Template edit.ctp
+
+msgid "Edit"
+msgstr "編集"
+
+
+## Template view.ctp
+
+msgid "Information"
+msgstr "内容詳細"
+
+
+## Controller
+
+msgid "The {0} has been saved."
+msgstr "{0} を保存しました。"
+
+msgid "The {0} could not be saved. Please, try again."
+msgstr "{0} の保存に失敗しました。再度やり直してください。"
+
+msgid "The {0} has been deleted."
+msgstr "{0} を削除しました。"
+
+msgid "The {0} could not be deleted. Please, try again."
+msgstr "{0} の削除に失敗しました。再度やり直してください。"
+
+
+## Login
+
+msgid "Sign in to start your session"
+msgstr "開始するには、ログインしてください。"
+
+msgid "OR"
+msgstr "あるいは"
+
+msgid "Sign in using Facebook"
+msgstr "Facebook　アカウントでログイン"
+
+msgid "Sign in using Google+"
+msgstr "Google+　アカウントでログイン"
+
+msgid "I forgot my password"
+msgstr "パスワードを忘れた"
+
+msgid "Register a new membership"
+msgstr "新規ユーザー登録する"
+
+msgid "Remember Me"
+msgstr "ログイン情報を記憶"
+
+msgid "Sign In"
+msgstr "ログイン"
+
+msgid "Username or password is incorrect"
+msgstr "ユーザー名かパスワードが間違っています。"
+
+
+## Elements
+
+msgid "Alert"
+msgstr "注意"
+
+
+## Helpers
+
+msgid "Click here to change the file."
+msgstr "ファイルを変更するには、ここをクリック"

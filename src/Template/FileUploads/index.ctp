@@ -85,7 +85,7 @@ $(document).ready(function(){
 
 <div class="box box-info">
   <div class="box-header with-border">
-    <h3 class="box-title"><i class="fa fa-folder"></i>&nbsp;&nbsp;<?php
+    <h3 class="box-title text-info"><i class="fa fa-folder "></i>&nbsp;&nbsp;<?php
     foreach ($categoryData as $key => $oneCategory) {
         if($oneCategory->id == $category_id){
             echo $oneCategory->name;
