@@ -15,7 +15,7 @@
 /tmp/tests/*
 !/tmp/tests/empty
 #/tmp/*
-#/tmp/debug_kit.sqlite
+/tmp/debug_kit.sqlite
 
 # OS generated files #
 ######################
