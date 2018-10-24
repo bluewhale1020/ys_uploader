@@ -199,7 +199,7 @@ $(document).ready(function(){
                 
               </div>
               <!-- /.responsive -->
-<?php if(!empty($previewData)): ?>            
+<?php if(!empty($previewData) or !empty($fileName)): ?>            
 <div class="row">
 
 
@@ -213,6 +213,29 @@ $(document).ready(function(){
         }else if($fileType == "pdfimage"){
             echo '<img  class="img-responsive img-thumbnail center-block" src="data:image/png;base64,'.base64_encode($previewData).'" alt="thumb" />';      
             $previewData->clear();
+        }else if($fileType == "pdf"){
+     //pdfviewerプラグインを使用してfile内のpdfを表示する
+                 //Use the html helper to generate a link (cannot be crossdomain);
+            //$pdfurl = $this->Url->build('/pdf_viewer/files/cookbookdemo.pdf',true); //Using true for full url, cookbookdemo.pdf is an example in the webroot of the plugin
+            
+            $pdfurl = $this->Url->build('/files/'.$fileName,true);
+            // echo $this->Url->build([
+                // "controller" => "Posts",
+                // "action" => "view",
+                // "bar",
+            // ]);
+            //echo $this->Url->build('/posts', true);
+
+            $vieweroptions = array(
+                    'pdfurl'    =>  $pdfurl,
+                    'class'     =>  'span6', //Class you want to give to canvas, use your own class. I use TwitterBootstrap so therefore i use the span6 (half page) class.
+                    'scale'     =>  1.0, //The 'zoom' or 'scale' factor. I use 2 for making the PDF more sharp in displaying. 
+                    'startpage' =>  1, //Starting page
+                );
+            
+            //Get the PdfView element that renders the PDF
+            echo $this->element('PdfViewer.viewer',$vieweroptions);
+
         }else{
              //write out the image to client browser width='".(200*$iw/$ih)."'
             echo "<img class='img-responsive img-thumbnail center-block' src='data:".$fileUpload->mime_type.";base64,".base64_encode($previewData)."' alt='thumb'>";        

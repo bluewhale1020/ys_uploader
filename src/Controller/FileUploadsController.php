@@ -125,13 +125,17 @@ class FileUploadsController extends AppController
         // if($imagedata){
             // $this->set('imagedata', $imagedata);
         // }
-        $previewData = $this->Preview->getPreviewData($fileUpload);
+        $previewData = $this->Preview->getPreviewData($fileUpload,false);
         if($previewData){
             $this->set('previewData', $previewData);
             $this->set('fileType', $this->Preview->getFileType());
             
             //$this->Preview->clearInstances();
             $this->Preview->deleteTempFile();
+        }elseif($this->Preview->hasPreviewImage()){
+            $this->set('fileType', $this->Preview->getFileType());
+            $this->set('fileName', $this->Preview->getOutFileName());
+            $this->set('tempFile', $this->Preview->hasTempFile());
         }        
         $this->set('fileUpload', $fileUpload);
     }
@@ -151,7 +155,7 @@ class FileUploadsController extends AppController
             
  
              // 下記の処理を追記します。
-            $dir = realpath(TMP . DS . "uploads");
+            $dir = realpath(WWW_ROOT . DS . "files");
             $limitFileSize = 50 * 1000 * 1000;//50MB 1024 * 1024;
             try {
                 $hash_name = $this->FileHandler->file_upload($this->request->data['file_name'], $dir, $limitFileSize);
@@ -256,7 +260,7 @@ class FileUploadsController extends AppController
              }   
 
 
-            $dir = realpath(TMP . DS . "uploads");          
+            $dir = realpath(WWW_ROOT . DS . "files");          
             try {
                 //view無しで 出力
                 $this->autoRender = false;
@@ -297,7 +301,7 @@ class FileUploadsController extends AppController
         //debug($fileUpload); die();
         //$fileUpload = $this->FileUploads->get($id);
         
-        $dir = realpath(TMP . DS . "uploads");
+        $dir = realpath(WWW_ROOT . DS . "files");
         try {
             //$filename = $this->FileHandler->conv_sjis_auto($fileUpload->file_name);
             $del_file = new File($dir . DS . $fileUpload->hash_name);
@@ -306,6 +310,7 @@ class FileUploadsController extends AppController
                 // ファイルがある時の処理
                 if($del_file->delete()) {
                     $fileUpload['file'] = "";
+                    $ret = $this->delTempFile($dir,$fileUpload->hash_name);
                 } else {
                     throw new RuntimeException('ファイルの物理削除ができませんでした.');
                 }
@@ -329,4 +334,26 @@ class FileUploadsController extends AppController
 
         return $this->redirect(['action' => 'index',$fileUpload->category_id]);
     }
+
+    private function delTempFile($dir,$hash_name){
+        
+        $ext = pathinfo($hash_name, PATHINFO_EXTENSION);
+        
+        if($ext != 'pdf'){
+            $del_file = new File($dir . DS . $hash_name . ".pdf");
+            
+            // ファイル削除処理実行
+            if ($del_file->exists()) {
+                // ファイルがある時の処理
+                return $del_file->delete();
+
+            }          
+            
+        }
+        
+        return true;
+        
+    }
+
+
 }

@@ -40,7 +40,6 @@ password:guest
     <div class="col-sm-12">
       <div class="box box-primary">
         <div class="box-header with-border">
-          <h4 class="box-title">主な機能</h4>
         </div><!-- /.box-header -->
         <div class="box-body">
 <dt><strong>ファイルをアップロード</strong></dt><dd>ファイルをアップロードし、パスワードを設定できます（任意）。</dd>

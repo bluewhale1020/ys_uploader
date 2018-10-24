@@ -69,6 +69,8 @@ class ComposerStaticInit2caf8df4d2daa37fc6de40677d53dc70
             'PhpOffice\\PhpWord\\' => 18,
             'PhpOffice\\Common\\' => 17,
             'Phinx\\' => 6,
+            'PdfViewer\\Test\\' => 15,
+            'PdfViewer\\' => 10,
         ),
         'M' => 
         array (
@@ -232,6 +234,14 @@ class ComposerStaticInit2caf8df4d2daa37fc6de40677d53dc70
         'Phinx\\' => 
         array (
             0 => __DIR__ . '/..' . '/robmorgan/phinx/src/Phinx',
+        ),
+        'PdfViewer\\Test\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/plugins/PdfViewer/tests',
+        ),
+        'PdfViewer\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/plugins/PdfViewer/src',
         ),
         'Migrations\\' => 
         array (

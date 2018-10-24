@@ -235,4 +235,5 @@ Configure::write('Theme', [
     'skin' => 'yellow' // default is 'blue'
 ]);
 
-
+//load PdfViewer
+Plugin::load('PdfViewer', ['autoload' => true,'bootstrap' => false, 'routes' => true]);

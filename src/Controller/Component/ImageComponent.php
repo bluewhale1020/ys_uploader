@@ -51,7 +51,7 @@ class ImageComponent extends Component
         }
         
      if(empty($dir)){
-        $dir = realpath(TMP .DS . "uploads");      
+        $dir = realpath(WWW_ROOT .DS . "files");      
     }
     
     $hash_name = $file['hash_name'];

@@ -42,12 +42,17 @@ class PreviewComponent extends Component
     protected $_allowedMime = [];
     protected $_fileType = "";
     protected $filepath;
+    protected $output_filename;
     protected $filename;
     protected $hash_name;
     protected $ext;
     protected $responseData;
     protected $dir; 
     protected $has_temp_file = false;
+    protected $has_preview = false;
+    
+    protected $COLUMNS = 600;
+    protected $ROWS = 600;
     
     public function initialize(array $config) {
         /*初期処理*/
@@ -55,7 +60,7 @@ class PreviewComponent extends Component
         
         $this->_allowedMime = $this->MimeTypes->createAllowedMimeArray();
         
-        $this->dir = realpath(TMP .DS . "uploads"); 
+        $this->dir = realpath(WWW_ROOT .DS . "files"); 
     }    
     
     private function setFileType($mime_type = null){
@@ -124,13 +129,13 @@ class PreviewComponent extends Component
         
     }
     
-    public function getPreviewData($file){
+    public function getPreviewData($file,$conv_to_image = false){
         if(empty($file)){
             return false;
         }
         
      // if(empty($dir)){
-        // $dir = realpath(TMP .DS . "uploads");      
+        // $dir = realpath(WWW_ROOT .DS . "files");      
     // }
     
     $this->hash_name = $file['hash_name'];
@@ -153,16 +158,36 @@ class PreviewComponent extends Component
                $this->setResponseData(); 
                break;         
            case 'pdf':
-               $this->convPdfImage();
+               if($conv_to_image){
+                   $this->convPdfImage();
+               }else{
+                   $this->has_preview = true;
+                   $this->_fileType = "pdf";
+                   $this->output_filename = $this->hash_name;
+               }
+               
+               
                break;
            case 'text':
                $this->convTxtPdf();
-               $this->convPdfImage();
+               if($conv_to_image){
+                   $this->convPdfImage();
+               } else{
+                   $this->has_preview = true;
+                   $this->_fileType = "pdf";                   
+               }              
+               
                $this->has_temp_file = true;               
                break;
             case 'word':
                $this->convWordPdf();
-               $this->convPdfImage();
+               if($conv_to_image){
+                   $this->convPdfImage();
+               } else{
+                   $this->has_preview = true;
+                   $this->_fileType = "pdf";                   
+               }                
+               
                $this->has_temp_file = true;                
                break; 
             case 'excel':
@@ -213,28 +238,33 @@ class PreviewComponent extends Component
         
         $this->responseData = $excelOutput;
         
-        //$this->filepath = $html_path;
     }
 
     private function convWordPdf(){
         $pdf_path = $this->dir . DS .$this->hash_name . '.pdf';
         
-        $domPdfPath =  ROOT . DS . 'vendor' . DS . 'dompdf' . DS . 'dompdf';
-        //$domPdfPath = realpath(__DIR__ . '/vendor/dompdf/dompdf');
-        WordSettings::setPdfRendererPath($domPdfPath);
-        WordSettings::setPdfRendererName('DomPDF');
+        if(!file_exists($pdf_path)){
+            $domPdfPath =  ROOT . DS . 'vendor' . DS . 'dompdf' . DS . 'dompdf';
+            //$domPdfPath = realpath(__DIR__ . '/vendor/dompdf/dompdf');
+            WordSettings::setPdfRendererPath($domPdfPath);
+            WordSettings::setPdfRendererName('DomPDF');
+            
+            
+            $phpWord = WordFactory::load($this->filepath);
+            //
+            
+            
+            $pdfWriter = WordFactory::createWriter( $phpWord, 'PDF' );
+            
+            
+            $pdfWriter->save($pdf_path);            
+        }
         
         
-        $phpWord = WordFactory::load($this->filepath);
-        //
         
+        $this->output_filename = $this->hash_name . '.pdf';
         
-        $pdfWriter = WordFactory::createWriter( $phpWord, 'PDF' );
-        
-        
-        $pdfWriter->save($pdf_path);        
-        
-        $this->filepath = $pdf_path;
+        $this->has_preview = true;
     }    
     
     
@@ -258,52 +288,58 @@ class PreviewComponent extends Component
     private function convTxtPdf(){
         
         $pdf_path = $this->dir . DS .$this->hash_name . '.pdf';
-        
-        $pdf = new Dompdf;
-        $list = file_get_contents($this->dir . DS . $this->hash_name);
-        
-        
-        
-        $list = $this->convert_encoding_text($list);
-        //$list = mb_convert_encoding($list, "UTF-8","SJIS");
-        $data = '';
-        //$list = @file_get_contents($filePath);
-        $list = explode("\n", $list);
-        foreach($list as $str){
-            $data .= $str . "<br />";
+
+        if(!file_exists($pdf_path)){
+            $pdf = new Dompdf;
+            $list = file_get_contents($this->dir . DS . $this->hash_name,false, null, 0, 3000);
+            
+            
+            
+            $list = $this->convert_encoding_text($list);
+            //$list = mb_convert_encoding($list, "UTF-8","SJIS");
+            $data = '';
+            //$list = @file_get_contents($filePath);
+            $list = explode("\n", $list);
+            foreach($list as $str){
+                $data .= $str . "<br />";
+            }
+            
+            
+            
+            $html = <<< EOF
+            <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+            <html xmlns="http://www.w3.org/1999/xhtml"  lang="ja">
+            <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+              <title>Bitnami: Open Source. Simplified</title>
+            <style>
+             body {
+                font-family: ipag;
+            }   
+            </style>
+              
+            </head>
+            <body>
+            ${data}
+            </body>
+            </html>       
+EOF;
+    
+    //print($html);die();
+            
+            $pdf->loadHtml($html);
+            //$pdf->set_option('enable_font_subsetting', true);
+            $pdf->set_option('defaultFont', 'ipag');
+            $pdf->render();
+            //ファイル出力の場合
+            file_put_contents($pdf_path, $pdf->output());             
         }
         
+       
         
-        
-        $html = <<< EOF
-        <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-        <html xmlns="http://www.w3.org/1999/xhtml"  lang="ja">
-        <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-          <title>Bitnami: Open Source. Simplified</title>
-        <style>
-         body {
-            font-family: ipag;
-        }   
-        </style>
-          
-        </head>
-        <body>
-        ${data}
-        </body>
-        </html>       
-EOF;
+        $this->output_filename = $this->hash_name . '.pdf';
 
-//print($html);die();
-        
-        $pdf->loadHtml($html);
-        //$pdf->set_option('enable_font_subsetting', true);
-        $pdf->set_option('defaultFont', 'ipag');
-        $pdf->render();
-        //ファイル出力の場合
-        file_put_contents($pdf_path, $pdf->output());        
-        
-        $this->filepath = $pdf_path;
+        $this->has_preview = true;
     }
     
     
@@ -332,15 +368,23 @@ EOF;
         $this->responseData->setImageFormat("png");
         
         // 長辺が 300 ピクセルになるようにリサイズ
-        $this->responseData->thumbnailImage(600, 600, true);
+        $this->responseData->thumbnailImage($this->COLUMNS, $this->ROWS, true);
         
         $this->_fileType = "pdfimage";      
     }  
 
+    public function getOutFileName(){
+        return $this->output_filename;
+    }
+
     public function getFileType(){
         return $this->_fileType;
     }
- 
-    
+    public function hasPreviewImage(){
+        return $this->has_preview;
+    } 
+     public function hasTempFile(){
+        return $this->has_temp_file;
+    }   
     
 }
