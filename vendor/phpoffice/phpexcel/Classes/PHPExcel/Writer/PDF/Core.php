@@ -47,7 +47,7 @@ abstract class PHPExcel_Writer_PDF_Core extends PHPExcel_Writer_HTML
      *
      * @var string
      */
-    protected $_font = 'freesans';
+    protected $_font = 'arialunicid0-japanese';//'freesans';
 
     /**
      * Orientation (Over-ride)

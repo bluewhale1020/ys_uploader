@@ -15,7 +15,8 @@
         "maiconpinto/cakephp-adminlte-theme": "^1.0",
         "mobiledetect/mobiledetectlib": "2.*",
         "phpoffice/phpexcel": "^1.8",
-        "phpoffice/phpword": "^0.14.0"
+        "phpoffice/phpword": "^0.14.0",
+        "tecnickcom/tcpdf": "^6.2"
     },
     "require-dev": {
         "cakephp/bake": "^1.1",

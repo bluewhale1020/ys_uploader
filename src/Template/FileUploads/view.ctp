@@ -172,7 +172,20 @@ $(document).ready(function(){
         </tr>
         <tr>
             <th scope="row"><?= __('サイズ') ?></th>
-            <td><?= h($fileUpload->file_size) ?></td>
+            <td><?php
+              //サイズのフォーマット用
+                function formatBytes($bytes, $precision = 2) {
+                    $units = array('B', 'KB', 'MB', 'GB', 'TB');
+                    $i = 0;
+                
+                    while($bytes > 1024) {
+                        $bytes /= 1024;
+                        $i++;
+                    }
+                    return round($bytes, $precision) . ' ' . $units[$i];
+                }             
+            
+                echo h(formatBytes($fileUpload->file_size, 2)); ?></td>
         </tr>
         <tr>
             <th scope="row"><?= __('内容') ?></th>

@@ -11,8 +11,12 @@ use Cake\Filesystem\File;
 use Dompdf\Dompdf;
 use PhpOffice\PhpWord\Settings as WordSettings;
 use PhpOffice\PhpWord\IOFactory as WordFactory;
-use PHPExcel_IOFactory;
 
+use PHPExcel;
+use PHPExcel_IOFactory;
+use PHPExcel_Settings;
+use PHPExcel_Cell;
+use PHPExcel_CachedObjectStorageFactory;
 
 use RuntimeException;
 
@@ -191,9 +195,19 @@ class PreviewComponent extends Component
                $this->has_temp_file = true;                
                break; 
             case 'excel':
-               $this->convExcelHtml();
-               //$this->setResponseData();
-               //$this->has_temp_file = true; 
+                $this->convExcelPdf();
+               if($conv_to_image){
+                   $this->convPdfImage();
+               } else{
+                   $this->has_preview = true;
+                   $this->_fileType = "pdf";                   
+               }                
+               
+               $this->has_temp_file = true;                
+                
+               //HTMLで出力する 
+               //$this->convExcelHtml();
+
                break;                         
            default:
                break;
@@ -240,22 +254,203 @@ class PreviewComponent extends Component
         
     }
 
+    private function convExcelPdf(){
+        $pdf_path = $this->dir . DS .$this->hash_name . '.pdf';
+        
+        if(!file_exists($pdf_path)){
+ 
+ 
+ //using Cache to reduce memory usage
+$cacheMethod = PHPExcel_CachedObjectStorageFactory:: cache_to_phpTemp;
+$cacheSettings = array( ' memoryCacheSize ' => '3MB');
+PHPExcel_Settings::setCacheStorageMethod($cacheMethod, $cacheSettings);
+            
+            if($this->ext == 'xlsx'){
+                $inputFileType = "Excel2007";
+            }else{
+                $inputFileType = "Excel5";
+            }
+            
+            /**  Create a new Reader of the type defined in $inputFileType  **/ 
+            $objReader = PHPExcel_IOFactory::createReader($inputFileType); 
+            /**  Read the list of worksheet names and select the one that we want to load  **/
+            //$worksheetList = $objReader->listWorksheetNames($this->filepath);
+            //$sheetname = $worksheetList[0]; 
+            
+            /**  Advise the Reader of which WorkSheets we want to load  **/ 
+            //$objReader->setLoadSheetsOnly($sheetname); 
+            /**  Load $inputFileName to a PHPExcel Object  **/ 
+            $book = $objReader->load($this->filepath);             
+            
+
+//ini_set('memory_limit', '512M'); // or you could use 1G
+
+    $objPHPExcel_des = new PHPExcel();
+ 
+
+
+    $objSheet = $book->getSheet(0)->copy();  
+
+
+
+    $highestRow = $objSheet->getHighestRow();
+    
+    if($highestRow > 30){
+      //$newSheet = $book->getSheet(0); 
+        
+        $objPHPExcel_des->setActiveSheetIndex( 0 );
+        $sheet_des = $objPHPExcel_des->getActiveSheet();     
+     
+        $this->copySheetRowsOld($objSheet,$sheet_des,0,0,30);   
+    }else{
+        $objPHPExcel_des->addExternalSheet($objSheet);
+        $objPHPExcel_des->removeSheetByIndex(0);
+        
+         $objPHPExcel_des->setActiveSheetIndex( 0 );
+     
+    }
+
+    $book->disconnectWorksheets();
+    unset($book);
+
+    $objPHPExcel_des->getActiveSheet()->setShowGridlines(false); 
+ 
+
+
+            // DomPDF
+            // PHPExcel_Settings::setPdfRenderer(
+                // PHPExcel_Settings::PDF_RENDERER_DOMPDF,
+                // ROOT .'/vendor/dompdf/dompdf'
+            // );            
+             // tcPDF
+            PHPExcel_Settings::setPdfRenderer(
+                PHPExcel_Settings::PDF_RENDERER_TCPDF,
+                ROOT .'/vendor/tecnickcom/tcpdf'
+            );                 
+           
+            // Write PDF
+            $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel_des, 'PDF');
+            $objWriter->setFont('kozgopromedium');//$objWriter->setFont('arialunicid0-japanese');            
+            $objWriter->save($pdf_path);            
+
+
+                       
+        }
+        
+        
+        
+        $this->output_filename = $this->hash_name . '.pdf';
+        
+        $this->has_preview = true;
+    }  
+
+
+/**
+ * 指定した行を別シートにコピー
+ * 
+ * @param obj  $srcSheet 挿入元シート
+ * @param obj  $dstSheet 挿入先シート
+ * @param int  $srcRow 複製元行番号
+ * @param int  $dstRow 複製先行番号
+ * @param int  $height 複製行数（複製元シート）
+ * @param int  $width 複製カラム数（複製元シート）
+ * @throws PHPExcel_Exception
+ */
+private function copySheetRowsOld($srcSheet,$dstSheet, $srcRow = 0, $dstRow = null, $height = null, $width = null) {
+
+    if(!isset($dstRow)){
+        //複製先シート行番号が未指定の場合、最大行数＋１を挿入
+        $dstRow = $dstSheet->getHighestRow() + 1;
+    }
+    if(!isset($height)){
+        //Heightが0で指定された場合、挿入元シートの最大行を指定する。
+        $height = $srcSheet->getHighestRow();
+    }
+    if(!isset($width)){
+        //Widthが0で指定された場合、挿入元シートの最大列を指定する。
+        $width = PHPExcel_Cell::columnIndexFromString($srcSheet->getHighestColumn()) - 1;
+    }
+ 
+    for ($row = 0; $row < $height; $row++) {
+        // セルの書式と値の複製
+        for ($col = 0; $col < $width; $col++) {
+            $srcCellPath = PHPExcel_Cell::stringFromColumnIndex($col) . (string) ($srcRow + $row);
+            $dstCellPath = PHPExcel_Cell::stringFromColumnIndex($col) . (string) ($dstRow + $row);
+ 
+            $srcCell = $srcSheet->getCell($srcCellPath);
+            //$srcStyle = $srcSheet->getStyle($srcCellPath);
+
+            $cell = $srcCell->getValue();
+                    if($cell instanceof PHPExcel_RichText)     //richText with color etc 
+                        $cell = $cell->__toString();  
+                    if(substr($cell,0,1)=='='){ //with fomula
+                        try{
+                            if($srcCell->getCalculatedValue() == '#REF!' || $srcCell->getCalculatedValue() == '#VALUE!')
+                            {
+                                $cell = $srcCell->getOldCalculatedValue();
+                            }
+                                else
+                            {
+                                $cell= $srcCell->getCalculatedValue();
+                            }
+                        }catch(Exception $e){
+                            $cell = $srcCell->getOldCalculatedValue();
+                        }
+            }
+             
+            //値のコピー
+            $dstSheet->setCellValueByColumnAndRow($col, $dstRow + $row, $cell);
+             
+            //書式コピー
+            //$dstSheet->duplicateStyle($srcStyle, $dstCellPath);      
+            
+        }
+ 
+        // 行の高さ複製。
+        $h = $srcSheet->getRowDimension($srcRow + $row)->getRowHeight();
+        $dstSheet->getRowDimension($dstRow + $row)->setRowHeight($h);
+    }
+     
+    // セル結合の複製
+    foreach ($srcSheet->getMergeCells() as $mergeCell) {
+        $mc = explode(":", $mergeCell);
+        $col_s = preg_replace("/[0-9]*/", "", $mc[0]);
+        $col_e = preg_replace("/[0-9]*/", "", $mc[1]);
+        $row_s = ((int) preg_replace("/[A-Z]*/", "", $mc[0])) - $srcRow;
+        $row_e = ((int) preg_replace("/[A-Z]*/", "", $mc[1])) - $srcRow;
+         
+        // 複製先の行範囲
+        if (0 <= $row_s && $row_s < $height) {
+            $merge = $col_s . (string) ($dstRow + $row_s) . ":" . $col_e . (string) ($dstRow + $row_e);
+            $dstSheet->mergeCells($merge);
+        }
+        unset($mc);
+    }
+}
+
+
+
     private function convWordPdf(){
         $pdf_path = $this->dir . DS .$this->hash_name . '.pdf';
         
         if(!file_exists($pdf_path)){
             $domPdfPath =  ROOT . DS . 'vendor' . DS . 'dompdf' . DS . 'dompdf';
             //$domPdfPath = realpath(__DIR__ . '/vendor/dompdf/dompdf');
-            WordSettings::setPdfRendererPath($domPdfPath);
-            WordSettings::setPdfRendererName('DomPDF');
-            
+            //WordSettings::setPdfRendererPath($domPdfPath);
+            //WordSettings::setPdfRendererName('DomPDF');
+ 
+
+             $tcPdfPath =  ROOT . DS . 'vendor' . DS . 'tecnickcom' . DS . 'tcpdf';
+            //$domPdfPath = realpath(__DIR__ . '/vendor/dompdf/dompdf');
+            WordSettings::setPdfRendererPath($tcPdfPath);
+            WordSettings::setPdfRendererName('TCPDF');           
             
             $phpWord = WordFactory::load($this->filepath);
             //
             
             
             $pdfWriter = WordFactory::createWriter( $phpWord, 'PDF' );
-            
+            $pdfWriter->setFont('kozgopromedium');
             
             $pdfWriter->save($pdf_path);            
         }

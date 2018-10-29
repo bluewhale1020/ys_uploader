@@ -26,8 +26,9 @@
  */
 
 
-/**  Require DomPDF library */
-$pdfRendererClassFile = PHPExcel_Settings::getPdfRendererPath() . '/dompdf_config.inc.php';
+/**  Require DomPDF library */ //20181025修正
+use Dompdf\Dompdf;
+$pdfRendererClassFile = PHPExcel_Settings::getPdfRendererPath() .'/autoload.inc.php';//'/dompdf_config.inc.php';
 if (file_exists($pdfRendererClassFile)) {
     require_once $pdfRendererClassFile;
 } else {
